@@ -14,7 +14,9 @@
 
 "use client";
 
-import type { Appointment, Doctor } from "@/types";
+import type { Appointment, Doctor, TimeSlot } from "@/types";
+import { format, addDays } from "date-fns";
+import { AppointmentCard } from "./AppointmentCard";
 
 interface WeekViewProps {
   appointments: Appointment[];
@@ -154,7 +156,8 @@ export function WeekView({
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-900">
           {/* TODO: Format week range (e.g., "Oct 14 - Oct 20, 2024") */}
-          Week View
+          {format(weekStartDate, "MMM d")} -{" "}
+          {format(addDays(weekStartDate, 6), "MMM d, yyyy")}
         </h3>
         {doctor && (
           <p className="text-sm text-gray-600">
@@ -166,80 +169,51 @@ export function WeekView({
       {/* Week grid - may need horizontal scroll on mobile */}
       <div className="border border-gray-200 rounded-lg overflow-x-auto">
         {/* TODO: Implement the week grid */}
-        <div className="text-center text-gray-500 py-12">
-          <p>Week View Grid Goes Here</p>
-          <p className="text-sm mt-2">
-            Implement 7-day grid (Mon-Sun) with time slots
-          </p>
+        <table className="min-w-full border-collapse">
+          <thead>
+            <tr>
+              <th className="w-20 p-2 text-xs bg-gray-50">Time</th>
+              {weekDays.map((day, index) => (
+                <th key={index} className="p-2 text-xs bg-gray-50 border-l">
+                  <div className="font-semibold">
+                    {day.toLocaleDateString("en-US", { weekday: "short" })}
+                  </div>
+                  <div className="text-gray-600 text-xs">
+                    {day.toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </div>
+                </th>
+              ))}
+            </tr>
+          </thead>
 
-          {/* Placeholder to show appointments exist */}
-          {appointments.length > 0 && (
-            <div className="mt-4">
-              <p className="text-sm font-medium">
-                {appointments.length} appointment(s) for this week
-              </p>
-            </div>
-          )}
-        </div>
+          <tbody>
+            {timeSlots.map((slot, slotIndex) => (
+              <tr key={slotIndex} className="border-t">
+                <td className="p-2 text-xs text-gray-600">{slot.label}</td>
 
-        {/* TODO: Replace above with actual grid implementation */}
-        <div className="border border-gray-200 rounded-lg overflow-x-auto">
-          <table className="min-w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="w-20 p-2 text-xs bg-gray-50">Time</th>
-                {weekDays.map((day, index) => (
-                  <th key={index} className="p-2 text-xs bg-gray-50 border-l">
-                    <div className="font-semibold">
-                      {day.toLocaleDateString("en-US", { weekday: "short" })}
-                    </div>
-                    <div className="text-gray-600 text-xs">
-                      {day.toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </div>
-                  </th>
+                {weekDays.map((day, dayIndex) => (
+                  <td
+                    key={dayIndex}
+                    className="p-1 border-l align-top min-h-[60px]"
+                  >
+                    {getAppointmentsForDayAndSlot(day, slot.start).map(
+                      (apt) => (
+                        <AppointmentCard
+                          key={apt.id}
+                          appointment={apt}
+                          compact
+                        />
+                      )
+                    )}
+                  </td>
                 ))}
               </tr>
-            </thead>
-
-            <tbody>
-              {timeSlots.map((slot, slotIndex) => (
-                <tr key={slotIndex} className="border-t">
-                  <td className="p-2 text-xs text-gray-600">{slot.label}</td>
-
-                  {weekDays.map((day, dayIndex) => (
-                    <td
-                      key={dayIndex}
-                      className="p-1 border-l align-top min-h-[60px]"
-                    >
-                      {getAppointmentsForDayAndSlot(day, slot.start).map(
-                        (apt) => {
-                          const colorClass =
-                            typeColors[apt.type] || typeColors.default;
-                          return (
-                            <div
-                              key={apt.id}
-                              className={`border-l-4 ${colorClass} p-1 rounded-sm text-xs mb-1`}
-                            >
-                              {apt.type} (
-                              {new Date(apt.startTime).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })}
-                              )
-                            </div>
-                          );
-                        }
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Empty state */}

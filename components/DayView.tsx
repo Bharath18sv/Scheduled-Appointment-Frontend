@@ -17,6 +17,7 @@
 import { appointmentService } from "@/services/appointmentService";
 import type { Appointment, Doctor, TimeSlot } from "@/types";
 import { AppointmentCard } from "./AppointmentCard";
+import { format } from "date-fns";
 
 interface DayViewProps {
   appointments: Appointment[];
@@ -85,7 +86,7 @@ export function DayView({ appointments, doctor, date }: DayViewProps) {
     return appointments.filter((app) => {
       const start = new Date(app.startTime);
       const end = new Date(app.endTime);
-      return slot.start > start && slot.end < end;
+      return start < slot.end && end > slot.start;
     });
   }
 
@@ -97,7 +98,7 @@ export function DayView({ appointments, doctor, date }: DayViewProps) {
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-gray-900">
           {/* TODO: Format date nicely (e.g., "Monday, October 15, 2024") */}
-          {date.toDateString()}
+          {format(date, "EEEE, MMMM d, yyyy")}
         </h3>
         {doctor && (
           <p className="text-sm text-gray-600">
@@ -109,28 +110,12 @@ export function DayView({ appointments, doctor, date }: DayViewProps) {
       {/* Timeline grid */}
       <div className="border border-gray-200 rounded-lg overflow-hidden">
         {/* TODO: Implement the timeline */}
-        <div className="text-center text-gray-500 py-12">
-          <p>Day View Timeline Goes Here</p>
-          <p className="text-sm mt-2">
-            Implement time slots (8 AM - 6 PM) and position appointments
-          </p>
-
-          {/* Placeholder to show appointments exist */}
-          {appointments.length > 0 && (
-            <div className="mt-4">
-              <p className="text-sm font-medium">
-                {appointments.length} appointment(s) for this day
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* TODO: Replace above with actual timeline implementation */}
-        {/* Example structure: */}
         <div className="divide-y divide-gray-100">
           {timeSlots.map((slot, index) => (
             <div key={index} className="flex">
-              <div className="w-24 p-2 text-sm text-gray-600">{slot.label}</div>
+              <div className="w-24 p-2 text-sm text-gray-600 bg-gray-50 border-r">
+                {slot.label}
+              </div>
               <div className="flex-1 p-2 min-h-[60px] relative">
                 {getAppointmentsForSlot(slot).map((appointment) => (
                   <AppointmentCard

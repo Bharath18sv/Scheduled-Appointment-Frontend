@@ -14,17 +14,12 @@
 
 "use client";
 
-import { useState } from "react";
 import type { CalendarView } from "@/types";
 import { useAppointments } from "@/hooks/useAppointments";
 import { DoctorSelector } from "./DoctorSelector";
 import { DayView } from "./DayView";
 import { WeekView } from "./WeekView";
-
-// TODO: Import your components
-// import { DoctorSelector } from './DoctorSelector';
-// import { DayView } from './DayView';
-// import { WeekView } from './WeekView';
+import { addDays, startOfWeek } from "date-fns";
 
 interface ScheduleViewProps {
   selectedDoctorId: string;
@@ -57,19 +52,15 @@ export function ScheduleView({
   onViewChange,
 }: ScheduleViewProps) {
   // TODO: Use the useAppointments hook to fetch data
-  // const { appointments, doctor, loading, error } = useAppointments({
-  //   doctorId: selectedDoctorId,
-  //   date: selectedDate,
-  // });
+  const weekStartDate = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Monday
+  const weekEndDate = addDays(weekStartDate, 6); // Sunday
+
   const { appointments, doctor, loading, error } = useAppointments({
     doctorId: selectedDoctorId,
     date: selectedDate,
+    startDate: view === "week" ? weekStartDate : undefined,
+    endDate: view === "week" ? weekEndDate : undefined,
   });
-  function getWeekStart(date: Date): Date {
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1);
-    return new Date(date.setDate(diff));
-  }
 
   if (loading)
     return <p className="p-6 text-gray-500">Loading appointments...</p>;
@@ -147,7 +138,7 @@ export function ScheduleView({
           <WeekView
             appointments={appointments}
             doctor={doctor}
-            weekStartDate={getWeekStart(selectedDate)}
+            weekStartDate={weekStartDate}
           />
         )}
       </div>

@@ -76,7 +76,7 @@ export function DoctorSelector({
   const selectedDoctor = doctors.find((d) => d.id === selectedDoctorId);
 
   return (
-    <div className="doctor-selector">
+    <div className="doctor-selector relative">
       {/* drop down */}
       <button
         type="button"

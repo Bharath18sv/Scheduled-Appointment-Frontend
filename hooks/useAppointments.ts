@@ -15,8 +15,6 @@
 import { useState, useEffect, useMemo } from "react";
 import type { Appointment, Doctor } from "@/types";
 import { appointmentService } from "@/services/appointmentService";
-import { set } from "date-fns";
-import { da } from "date-fns/locale";
 
 /**
  * Hook parameters
@@ -120,6 +118,8 @@ export function useAppointments(
  * - useDoctors() - hook to get all doctors
  */
 
-export function useDayViewAppointments(doctorId: string, date: Date){
-  
+export function useDoctors() {
+  return useMemo(() => {
+    return appointmentService.getAllDoctors();
+  }, []);
 }

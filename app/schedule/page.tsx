@@ -16,15 +16,16 @@ import { useState } from "react";
 import { MOCK_DOCTORS } from "@/data/mockData";
 import type { CalendarView } from "@/types";
 import { ScheduleView } from "@/components/ScheduleView";
-
-// TODO: Import your components here
-// import { ScheduleView } from '@/components/ScheduleView';
+import { startOfWeek } from "date-fns";
 
 export default function SchedulePage() {
   const [selectedDoctorId, setSelectedDoctorId] = useState<string>(
     MOCK_DOCTORS[0].id
   );
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  // Default to Monday of current week so appointments are visible
+  const [selectedDate, setSelectedDate] = useState<Date>(
+    startOfWeek(new Date(), { weekStartsOn: 1 })
+  );
   const [view, setView] = useState<CalendarView>("day");
 
   return (

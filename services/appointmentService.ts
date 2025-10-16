@@ -34,11 +34,11 @@ import {
  */
 
 // helper function:
-function isSameDay(date1: Date, date2: Date): Boolean {
+function isSameDay(date1: Date, date2: Date): boolean {
   return (
-    date1.getFullYear === date2.getFullYear &&
-    date1.getMonth === date2.getMonth &&
-    date1.getDate === date2.getDate
+    date1.getFullYear() === date2.getFullYear() &&
+    date1.getMonth() === date2.getMonth() &&
+    date1.getDate() === date2.getDate()
   );
 }
 export class AppointmentService {
@@ -122,7 +122,7 @@ export class AppointmentService {
     const doctor = getDoctorById(appointment.doctorId);
     const patient = getPatientById(appointment.patientId);
 
-    if (!doctor || !patient) throw new Error("No Appointments for given ids");
+    if (!doctor || !patient) return null;
 
     const populatedAppointment: PopulatedAppointment = {
       ...appointment,
@@ -151,11 +151,7 @@ export class AppointmentService {
    */
   getDoctorById(id: string): Doctor | undefined {
     // TODO: Implement - find doctor by ID
-    const doctor = MOCK_DOCTORS.find((doc) => doc.id === id);
-    if (!doctor) {
-      throw new Error("No Doctor found");
-    }
-    return doctor;
+    return MOCK_DOCTORS.find((doc) => doc.id === id);
   }
 
   /**
