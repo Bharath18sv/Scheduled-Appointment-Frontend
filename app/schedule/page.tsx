@@ -16,22 +16,39 @@ export default function SchedulePage() {
   const [view, setView] = useState<CalendarView>("day");
 
   return (
-    <main className="min-h-screen bg-gray-50 py-10">
-      <div className="max-w-6xl mx-auto px-4">
+    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+
+      <div className="relative max-w-7xl mx-auto px-4 py-8">
         {/* Header Section */}
-        <header className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-semibold text-gray-900">
-              Appointment Schedule
-            </h1>
-            <p className="text-gray-500 text-sm sm:text-base mt-1">
-              Manage and view doctor appointments
-            </p>
+        <header className="mb-8 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl mb-6 shadow-lg">
+            <svg
+              className="w-8 h-8 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
           </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-3">
+            Hospital Appointment Scheduler
+          </h1>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            View and manage doctor appointments with our intuitive scheduling
+            system
+          </p>
         </header>
 
         {/* Content Section */}
-        <section className="bg-white shadow-sm rounded-2xl border border-gray-100 p-6 sm:p-8">
+        <section className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-xl border border-white/20 overflow-hidden">
           <ScheduleView
             selectedDoctorId={selectedDoctorId}
             selectedDate={selectedDate}
