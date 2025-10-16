@@ -10,19 +10,22 @@
  * 3. Handle view switching (day/week)
  */
 
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { MOCK_DOCTORS } from '@/data/mockData';
-import type { CalendarView } from '@/types';
+import { useState } from "react";
+import { MOCK_DOCTORS } from "@/data/mockData";
+import type { CalendarView } from "@/types";
+import { ScheduleView } from "@/components/ScheduleView";
 
 // TODO: Import your components here
 // import { ScheduleView } from '@/components/ScheduleView';
 
 export default function SchedulePage() {
-  const [selectedDoctorId, setSelectedDoctorId] = useState<string>(MOCK_DOCTORS[0].id);
+  const [selectedDoctorId, setSelectedDoctorId] = useState<string>(
+    MOCK_DOCTORS[0].id
+  );
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [view, setView] = useState<CalendarView>('day');
+  const [view, setView] = useState<CalendarView>("day");
 
   return (
     <main className="min-h-screen bg-gray-50 p-8">
@@ -31,13 +34,11 @@ export default function SchedulePage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Appointment Schedule
           </h1>
-          <p className="text-gray-600">
-            View and manage doctor appointments
-          </p>
+          <p className="text-gray-600">View and manage doctor appointments</p>
         </header>
 
         {/* TODO: Replace this placeholder with your ScheduleView component */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
+        {/* <div className="bg-white rounded-lg shadow-lg p-8">
           <div className="text-center text-gray-500 py-12">
             <p className="text-lg mb-4">
               Schedule View Component Goes Here
@@ -53,10 +54,10 @@ export default function SchedulePage() {
               <p className="text-sm">View: {view}</p>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* TODO: Uncomment and use when ScheduleView is implemented */}
-        {/*
+
         <ScheduleView
           selectedDoctorId={selectedDoctorId}
           selectedDate={selectedDate}
@@ -65,7 +66,6 @@ export default function SchedulePage() {
           onDateChange={setSelectedDate}
           onViewChange={setView}
         />
-        */}
       </div>
     </main>
   );

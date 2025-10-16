@@ -238,7 +238,7 @@ export const MOCK_APPOINTMENTS: Appointment[] = [
   { id: 'apt-54', patientId: 'pat-4', doctorId: 'doc-3', type: 'consultation', startTime: getWeekDate(5, 10, 0), endTime: getEndTime(getWeekDate(5, 10, 0), 60), status: 'scheduled' },
   { id: 'apt-55', patientId: 'pat-5', doctorId: 'doc-3', type: 'checkup', startTime: getWeekDate(5, 12, 0), endTime: getEndTime(getWeekDate(5, 12, 0), 30), status: 'scheduled' },
 ];
-
+console.log(MOCK_APPOINTMENTS[1])
 /**
  * Helper function to get a doctor by ID
  */

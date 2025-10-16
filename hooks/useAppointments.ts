@@ -12,9 +12,11 @@
  * 4. Think about how to make this reusable for both day and week views
  */
 
-import { useState, useEffect, useMemo } from 'react';
-import type { Appointment, Doctor } from '@/types';
-import { appointmentService } from '@/services/appointmentService';
+import { useState, useEffect, useMemo } from "react";
+import type { Appointment, Doctor } from "@/types";
+import { appointmentService } from "@/services/appointmentService";
+import { set } from "date-fns";
+import { da } from "date-fns/locale";
 
 /**
  * Hook parameters
@@ -51,7 +53,9 @@ interface UseAppointmentsReturn {
  * - Use useMemo to memoize expensive computations
  * - Consider how to handle both single date (day view) and date range (week view)
  */
-export function useAppointments(params: UseAppointmentsParams): UseAppointmentsReturn {
+export function useAppointments(
+  params: UseAppointmentsParams
+): UseAppointmentsReturn {
   const { doctorId, date, startDate, endDate } = params;
 
   // TODO: Add state for appointments, loading, error
@@ -62,8 +66,7 @@ export function useAppointments(params: UseAppointmentsParams): UseAppointmentsR
   // TODO: Fetch doctor data
   const doctor = useMemo(() => {
     // Implement: Get doctor by ID
-    // return appointmentService.getDoctorById(doctorId);
-    return undefined;
+    return appointmentService.getDoctorById(doctorId);
   }, [doctorId]);
 
   // TODO: Fetch appointments when dependencies change
@@ -75,11 +78,29 @@ export function useAppointments(params: UseAppointmentsParams): UseAppointmentsR
     // - Set loading state
     // - Handle errors
     // - Set appointments
+    setLoading(true);
+    setError(null);
 
-    console.log('TODO: Fetch appointments for', { doctorId, date, startDate, endDate });
-
+    try {
+      if (startDate && endDate) {
+        setAppointments(
+          appointmentService.getAppointmentsByDoctorAndDateRange(
+            doctorId,
+            startDate,
+            endDate
+          )
+        );
+      } else {
+        setAppointments(
+          appointmentService.getAppointmentsByDoctorAndDate(doctorId, date)
+        );
+      }
+    } catch (error) {
+      setError(error as Error);
+    } finally {
+      setLoading(false);
+    }
     // Placeholder - remove when implementing
-    setLoading(false);
   }, [doctorId, date, startDate, endDate]);
 
   return {
@@ -98,3 +119,7 @@ export function useAppointments(params: UseAppointmentsParams): UseAppointmentsR
  * - useWeekViewAppointments(doctorId: string, weekStartDate: Date)
  * - useDoctors() - hook to get all doctors
  */
+
+export function useDayViewAppointments(doctorId: string, date: Date){
+  
+}

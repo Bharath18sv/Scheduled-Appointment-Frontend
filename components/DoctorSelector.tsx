@@ -12,10 +12,12 @@
  * 5. Consider using a custom dropdown or native select
  */
 
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import type { Doctor } from '@/types';
+import { useState, useEffect, useRef } from "react";
+import type { Doctor } from "@/types";
+import { MOCK_DOCTORS } from "@/data/mockData";
+import { appointmentService } from "@/services/appointmentService";
 
 interface DoctorSelectorProps {
   selectedDoctorId: string;
@@ -35,23 +37,39 @@ interface DoctorSelectorProps {
  * - How to display doctor info (name + specialty)?
  * - Should this be a reusable component?
  */
+
 export function DoctorSelector({
   selectedDoctorId,
   onDoctorChange,
 }: DoctorSelectorProps) {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const dropDownRef = useRef<HTMLDivElement>(null);
 
   // TODO: Fetch doctors
   useEffect(() => {
-    // Option 1: Use appointmentService to get doctors
-    // const allDoctors = appointmentService.getAllDoctors();
-    // setDoctors(allDoctors);
+    const allDoctors = appointmentService.getAllDoctors();
+    setDoctors(allDoctors);
 
-    // Option 2: Import MOCK_DOCTORS directly
-    // import { MOCK_DOCTORS } from '@/data/mockData';
-    // setDoctors(MOCK_DOCTORS);
+    console.log("TODO: Fetch doctors");
+  }, []);
 
-    console.log('TODO: Fetch doctors');
+  // use effect to handle click outside the dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        dropDownRef.current &&
+        !dropDownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   // Find currently selected doctor for display
@@ -59,25 +77,7 @@ export function DoctorSelector({
 
   return (
     <div className="doctor-selector">
-      {/* TODO: Implement the dropdown */}
-
-      {/* Option 1: Native select */}
-      <select
-        value={selectedDoctorId}
-        onChange={(e) => onDoctorChange(e.target.value)}
-        className="block w-full px-4 py-2 pr-8 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="">Select a doctor...</option>
-        {/* TODO: Map over doctors and create options */}
-        {doctors.map((doctor) => (
-          <option key={doctor.id} value={doctor.id}>
-            {/* TODO: Format display text (e.g., "Dr. Sarah Chen - Cardiology") */}
-            Dr. {doctor.name} - {doctor.specialty}
-          </option>
-        ))}
-      </select>
-
-      {/* Option 2: Custom dropdown (BONUS)
+      {/* drop down */}
       <button
         type="button"
         className="w-full px-4 py-2 text-sm text-left border rounded-lg"
@@ -85,7 +85,7 @@ export function DoctorSelector({
       >
         {selectedDoctor
           ? `Dr. ${selectedDoctor.name} - ${selectedDoctor.specialty}`
-          : 'Select a doctor...'}
+          : "Select a doctor..."}
       </button>
 
       {isOpen && (
@@ -104,7 +104,6 @@ export function DoctorSelector({
           ))}
         </div>
       )}
-      */}
     </div>
   );
 }

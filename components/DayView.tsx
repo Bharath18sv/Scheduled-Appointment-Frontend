@@ -12,9 +12,11 @@
  * 6. Handle overlapping appointments gracefully
  */
 
-'use client';
+"use client";
 
-import type { Appointment, Doctor, TimeSlot } from '@/types';
+import { appointmentService } from "@/services/appointmentService";
+import type { Appointment, Doctor, TimeSlot } from "@/types";
+import { AppointmentCard } from "./AppointmentCard";
 
 interface DayViewProps {
   appointments: Appointment[];
@@ -51,14 +53,25 @@ export function DayView({ appointments, doctor, date }: DayViewProps) {
    * Hint: You can use a loop or date-fns utilities
    */
   function generateTimeSlots(): TimeSlot[] {
-    // TODO: Implement time slot generation
-    // Example structure:
-    // return [
-    //   { start: new Date(...8:00), end: new Date(...8:30), label: '8:00 AM' },
-    //   { start: new Date(...8:30), end: new Date(...9:00), label: '8:30 AM' },
-    //   ...
-    // ];
-    return [];
+    const slot: TimeSlot[] = [];
+
+    for (let hour = 8; hour < 18; hour++) {
+      for (let minute of [0, 30]) {
+        let start = new Date(date);
+        start.setHours(hour, minute, 0, 0);
+        let end = new Date(start);
+        end.setMinutes(start.getMinutes() + 30);
+
+        const label = start.toLocaleDateString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        });
+
+        slot.push({ start, end, label });
+      }
+    }
+    return slot;
   }
 
   /**
@@ -69,7 +82,11 @@ export function DayView({ appointments, doctor, date }: DayViewProps) {
   function getAppointmentsForSlot(slot: TimeSlot): Appointment[] {
     // TODO: Implement appointment filtering
     // Check if appointment.startTime or appointment.endTime falls within the slot
-    return [];
+    return appointments.filter((app) => {
+      const start = new Date(app.startTime);
+      const end = new Date(app.endTime);
+      return slot.start > start && slot.end < end;
+    });
   }
 
   const timeSlots = generateTimeSlots();
@@ -109,22 +126,22 @@ export function DayView({ appointments, doctor, date }: DayViewProps) {
         </div>
 
         {/* TODO: Replace above with actual timeline implementation */}
-        {/* Example structure:
+        {/* Example structure: */}
         <div className="divide-y divide-gray-100">
           {timeSlots.map((slot, index) => (
             <div key={index} className="flex">
-              <div className="w-24 p-2 text-sm text-gray-600">
-                {slot.label}
-              </div>
+              <div className="w-24 p-2 text-sm text-gray-600">{slot.label}</div>
               <div className="flex-1 p-2 min-h-[60px] relative">
-                {getAppointmentsForSlot(slot).map(appointment => (
-                  <AppointmentCard key={appointment.id} appointment={appointment} />
+                {getAppointmentsForSlot(slot).map((appointment) => (
+                  <AppointmentCard
+                    key={appointment.id}
+                    appointment={appointment}
+                  />
                 ))}
               </div>
             </div>
           ))}
         </div>
-        */}
       </div>
 
       {/* Empty state */}

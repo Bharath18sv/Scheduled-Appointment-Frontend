@@ -12,9 +12,9 @@
  * 6. Handle overlapping appointments
  */
 
-'use client';
+"use client";
 
-import type { Appointment, Doctor } from '@/types';
+import type { Appointment, Doctor } from "@/types";
 
 interface WeekViewProps {
   appointments: Appointment[];
@@ -41,7 +41,11 @@ interface WeekViewProps {
  * - How to handle appointments that span multiple hours?
  * - Should you reuse logic from DayView?
  */
-export function WeekView({ appointments, doctor, weekStartDate }: WeekViewProps) {
+export function WeekView({
+  appointments,
+  doctor,
+  weekStartDate,
+}: WeekViewProps) {
   /**
    * TODO: Generate array of 7 dates (Monday through Sunday)
    *
@@ -56,7 +60,13 @@ export function WeekView({ appointments, doctor, weekStartDate }: WeekViewProps)
     //   ...
     //   addDays(weekStartDate, 6), // Sunday
     // ];
-    return [];
+    const days: Date[] = [];
+    for (let i = 0; i < 7; i++) {
+      const day = new Date(weekStartDate);
+      day.setDate(weekStartDate.getDate() + i);
+      days.push(day);
+    }
+    return days;
   }
 
   /**
@@ -64,7 +74,26 @@ export function WeekView({ appointments, doctor, weekStartDate }: WeekViewProps)
    */
   function generateTimeSlots() {
     // TODO: Implement (can be same as DayView)
-    return [];
+    const slots = [];
+    const startHour = 8;
+    const endHour = 18; // 6 PM
+
+    for (let hour = startHour; hour < endHour; hour++) {
+      const start = new Date();
+      start.setHours(hour, 0, 0, 0);
+
+      const end = new Date();
+      end.setHours(hour + 1, 0, 0, 0);
+
+      slots.push({
+        start,
+        end,
+        label: `${hour.toString().padStart(2, "0")}:00 - ${(hour + 1)
+          .toString()
+          .padStart(2, "0")}:00`,
+      });
+    }
+    return slots;
   }
 
   /**
@@ -72,19 +101,52 @@ export function WeekView({ appointments, doctor, weekStartDate }: WeekViewProps)
    */
   function getAppointmentsForDay(date: Date): Appointment[] {
     // TODO: Filter appointments that fall on this specific day
-    return [];
+    return appointments.filter((apt) => {
+      const aptDate = new Date(apt.startTime);
+      return (
+        aptDate.getFullYear() === date.getFullYear() &&
+        aptDate.getMonth() === date.getMonth() &&
+        aptDate.getDate() === date.getDate()
+      );
+    });
   }
 
   /**
    * TODO: Get appointments for a specific day and time slot
    */
-  function getAppointmentsForDayAndSlot(date: Date, slotStart: Date): Appointment[] {
+  function getAppointmentsForDayAndSlot(
+    date: Date,
+    slotStart: Date
+  ): Appointment[] {
     // TODO: Filter appointments for this day and time
-    return [];
+    const slotEnd = new Date(slotStart);
+    slotEnd.setHours(slotEnd.getHours() + 1);
+
+    return appointments.filter((apt) => {
+      const aptStart = new Date(apt.startTime);
+      const aptEnd = new Date(apt.endTime);
+
+      // Match same day
+      const sameDay =
+        aptStart.getFullYear() === date.getFullYear() &&
+        aptStart.getMonth() === date.getMonth() &&
+        aptStart.getDate() === date.getDate();
+
+      // Check overlap with slot
+      const overlaps = aptStart < slotEnd && aptEnd > slotStart;
+
+      return sameDay && overlaps;
+    });
   }
 
   const weekDays = getWeekDays();
   const timeSlots = generateTimeSlots();
+  const typeColors: Record<string, string> = {
+    checkup: "bg-blue-100 border-blue-400",
+    consultation: "bg-green-100 border-green-400",
+    surgery: "bg-red-100 border-red-400",
+    default: "bg-gray-100 border-gray-400",
+  };
 
   return (
     <div className="week-view">
@@ -121,35 +183,63 @@ export function WeekView({ appointments, doctor, weekStartDate }: WeekViewProps)
         </div>
 
         {/* TODO: Replace above with actual grid implementation */}
-        {/* Example structure:
-        <table className="min-w-full">
-          <thead>
-            <tr>
-              <th className="w-20 p-2 text-xs bg-gray-50">Time</th>
-              {weekDays.map((day, index) => (
-                <th key={index} className="p-2 text-xs bg-gray-50 border-l">
-                  <div className="font-semibold">{format(day, 'EEE')}</div>
-                  <div className="text-gray-600">{format(day, 'MMM d')}</div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {timeSlots.map((slot, slotIndex) => (
-              <tr key={slotIndex} className="border-t">
-                <td className="p-2 text-xs text-gray-600">{slot.label}</td>
-                {weekDays.map((day, dayIndex) => (
-                  <td key={dayIndex} className="p-1 border-l align-top min-h-[60px]">
-                    {getAppointmentsForDayAndSlot(day, slot.start).map(apt => (
-                      <AppointmentCard key={apt.id} appointment={apt} compact />
-                    ))}
-                  </td>
+        <div className="border border-gray-200 rounded-lg overflow-x-auto">
+          <table className="min-w-full border-collapse">
+            <thead>
+              <tr>
+                <th className="w-20 p-2 text-xs bg-gray-50">Time</th>
+                {weekDays.map((day, index) => (
+                  <th key={index} className="p-2 text-xs bg-gray-50 border-l">
+                    <div className="font-semibold">
+                      {day.toLocaleDateString("en-US", { weekday: "short" })}
+                    </div>
+                    <div className="text-gray-600 text-xs">
+                      {day.toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </div>
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-        */}
+            </thead>
+
+            <tbody>
+              {timeSlots.map((slot, slotIndex) => (
+                <tr key={slotIndex} className="border-t">
+                  <td className="p-2 text-xs text-gray-600">{slot.label}</td>
+
+                  {weekDays.map((day, dayIndex) => (
+                    <td
+                      key={dayIndex}
+                      className="p-1 border-l align-top min-h-[60px]"
+                    >
+                      {getAppointmentsForDayAndSlot(day, slot.start).map(
+                        (apt) => {
+                          const colorClass =
+                            typeColors[apt.type] || typeColors.default;
+                          return (
+                            <div
+                              key={apt.id}
+                              className={`border-l-4 ${colorClass} p-1 rounded-sm text-xs mb-1`}
+                            >
+                              {apt.type} (
+                              {new Date(apt.startTime).toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                              )
+                            </div>
+                          );
+                        }
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Empty state */}

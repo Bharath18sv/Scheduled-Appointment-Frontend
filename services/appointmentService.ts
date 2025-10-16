@@ -12,14 +12,19 @@
  * 5. Think about how to structure this for testability
  */
 
-import type { Appointment, Doctor, Patient, PopulatedAppointment } from '@/types';
+import type {
+  Appointment,
+  Doctor,
+  Patient,
+  PopulatedAppointment,
+} from "@/types";
 import {
   MOCK_APPOINTMENTS,
   MOCK_DOCTORS,
   MOCK_PATIENTS,
   getDoctorById,
   getPatientById,
-} from '@/data/mockData';
+} from "@/data/mockData";
 
 /**
  * AppointmentService class
@@ -27,6 +32,15 @@ import {
  * Provides methods to access and manipulate appointment data.
  * This is where you abstract data access from your components.
  */
+
+// helper function:
+function isSameDay(date1: Date, date2: Date): Boolean {
+  return (
+    date1.getFullYear === date2.getFullYear &&
+    date1.getMonth === date2.getMonth &&
+    date1.getDate === date2.getDate
+  );
+}
 export class AppointmentService {
   /**
    * Get all appointments for a specific doctor
@@ -35,8 +49,16 @@ export class AppointmentService {
    */
   getAppointmentsByDoctor(doctorId: string): Appointment[] {
     // TODO: Implement - filter MOCK_APPOINTMENTS by doctorId
-    throw new Error('Not implemented - getAppointmentsByDoctor');
+    const AllDoctorAppoinments = MOCK_APPOINTMENTS.filter(
+      (app) => app.doctorId === doctorId
+    );
+    // if (!AllDoctorAppoinments) {
+    //   return null;
+    // }
+    return AllDoctorAppoinments;
   }
+
+  // function to calculate whether the date passed and the appointment date are same day
 
   /**
    * Get appointments for a specific doctor on a specific date
@@ -46,10 +68,18 @@ export class AppointmentService {
    * @param date - The date to filter by
    * @returns Array of appointments for that doctor on that date
    */
+
   getAppointmentsByDoctorAndDate(doctorId: string, date: Date): Appointment[] {
     // TODO: Implement - filter by doctor AND date
     // Hint: You'll need to compare dates properly (same day, ignoring time)
-    throw new Error('Not implemented - getAppointmentsByDoctorAndDate');
+    const targetDate = new Date(date);
+    const doctorAndDateAppointments = MOCK_APPOINTMENTS.filter(
+      (app) =>
+        app.doctorId === doctorId &&
+        isSameDay(new Date(app.startTime), targetDate)
+    );
+
+    return doctorAndDateAppointments;
   }
 
   /**
@@ -67,7 +97,14 @@ export class AppointmentService {
     endDate: Date
   ): Appointment[] {
     // TODO: Implement - filter by doctor AND date range
-    throw new Error('Not implemented - getAppointmentsByDoctorAndDateRange');
+    const doctorAndDateRangeAppointments = MOCK_APPOINTMENTS.filter((app) => {
+      const start = new Date(app.startTime);
+      const end = new Date(app.endTime);
+
+      return app.doctorId === doctorId && start >= startDate && end <= endDate;
+    });
+
+    return doctorAndDateRangeAppointments;
   }
 
   /**
@@ -77,10 +114,23 @@ export class AppointmentService {
    *
    * TODO: Implement this helper method
    */
-  getPopulatedAppointment(appointment: Appointment): PopulatedAppointment | null {
+  getPopulatedAppointment(
+    appointment: Appointment
+  ): PopulatedAppointment | null {
     // TODO: Implement - merge appointment with patient and doctor data
     // Hint: Use getDoctorById and getPatientById from mockData
-    throw new Error('Not implemented - getPopulatedAppointment');
+    const doctor = getDoctorById(appointment.doctorId);
+    const patient = getPatientById(appointment.patientId);
+
+    if (!doctor || !patient) throw new Error("No Appointments for given ids");
+
+    const populatedAppointment: PopulatedAppointment = {
+      ...appointment,
+      patient: patient,
+      doctor: doctor,
+    };
+
+    return populatedAppointment;
   }
 
   /**
@@ -90,7 +140,8 @@ export class AppointmentService {
    */
   getAllDoctors(): Doctor[] {
     // TODO: Implement - return all doctors
-    throw new Error('Not implemented - getAllDoctors');
+    return MOCK_DOCTORS;
+    // throw new Error("Not implemented - getAllDoctors");
   }
 
   /**
@@ -100,7 +151,11 @@ export class AppointmentService {
    */
   getDoctorById(id: string): Doctor | undefined {
     // TODO: Implement - find doctor by ID
-    throw new Error('Not implemented - getDoctorById');
+    const doctor = MOCK_DOCTORS.find((doc) => doc.id === id);
+    if (!doctor) {
+      throw new Error("No Doctor found");
+    }
+    return doctor;
   }
 
   /**
