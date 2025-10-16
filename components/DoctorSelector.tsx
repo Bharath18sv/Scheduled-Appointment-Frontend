@@ -1,22 +1,7 @@
-/**
- * DoctorSelector Component
- *
- * Dropdown to select which doctor's schedule to view.
- * For front desk staff (can see all doctors).
- *
- * TODO for candidates:
- * 1. Fetch list of all doctors
- * 2. Display in a dropdown/select
- * 3. Show doctor name and specialty
- * 4. Handle selection change
- * 5. Consider using a custom dropdown or native select
- */
-
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import type { Doctor } from "@/types";
-import { MOCK_DOCTORS } from "@/data/mockData";
 import { appointmentService } from "@/services/appointmentService";
 
 interface DoctorSelectorProps {
@@ -24,84 +9,95 @@ interface DoctorSelectorProps {
   onDoctorChange: (doctorId: string) => void;
 }
 
-/**
- * DoctorSelector Component
- *
- * A dropdown to select a doctor from the list of available doctors.
- *
- * TODO: Implement this component
- *
- * Consider:
- * - Should you fetch doctors here or accept them as props?
- * - Native <select> or custom dropdown component?
- * - How to display doctor info (name + specialty)?
- * - Should this be a reusable component?
- */
-
 export function DoctorSelector({
   selectedDoctorId,
   onDoctorChange,
 }: DoctorSelectorProps) {
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const dropDownRef = useRef<HTMLDivElement>(null);
-
-  // TODO: Fetch doctors
+  // Fetch all doctors from the service
   useEffect(() => {
     const allDoctors = appointmentService.getAllDoctors();
     setDoctors(allDoctors);
-
-    console.log("TODO: Fetch doctors");
   }, []);
 
-  // use effect to handle click outside the dropdown
+  // Handle click outside to close dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
-        dropDownRef.current &&
-        !dropDownRef.current.contains(event.target as Node)
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
 
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Find currently selected doctor for display
   const selectedDoctor = doctors.find((d) => d.id === selectedDoctorId);
 
   return (
-    <div className="doctor-selector relative">
-      {/* drop down */}
+    <div className="relative w-64" ref={dropdownRef}>
+      {/* Dropdown Button */}
       <button
         type="button"
-        className="w-full px-4 py-2 text-sm text-left border rounded-lg"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setIsOpen((prev) => !prev)}
+        className={`w-full px-4 py-2 text-sm border rounded-lg flex justify-between items-center transition-colors ${
+          isOpen
+            ? "border-blue-400 bg-blue-50"
+            : "border-gray-300 bg-white hover:border-gray-400"
+        }`}
       >
-        {selectedDoctor
-          ? `Dr. ${selectedDoctor.name} - ${selectedDoctor.specialty}`
-          : "Select a doctor..."}
+        <span className="truncate text-gray-700">
+          {selectedDoctor
+            ? `Dr. ${selectedDoctor.name} — ${selectedDoctor.specialty}`
+            : "Select a doctor..."}
+        </span>
+        <svg
+          className={`w-4 h-4 text-gray-500 transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
       </button>
 
+      {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute mt-1 w-full bg-white border rounded-lg shadow-lg">
-          {doctors.map((doctor) => (
-            <button
-              key={doctor.id}
-              className="w-full px-4 py-2 text-left hover:bg-gray-100"
-              onClick={() => {
-                onDoctorChange(doctor.id);
-                setIsOpen(false);
-              }}
-            >
-              Dr. {doctor.name} - {doctor.specialty}
-            </button>
-          ))}
+        <div className="absolute mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden animate-fadeIn">
+          {doctors.map((doctor) => {
+            const isSelected = doctor.id === selectedDoctorId;
+            return (
+              <button
+                key={doctor.id}
+                onClick={() => {
+                  onDoctorChange(doctor.id);
+                  setIsOpen(false);
+                }}
+                className={`w-full text-left px-4 py-2 text-sm transition-colors ${
+                  isSelected
+                    ? "bg-blue-100 text-blue-700 font-medium"
+                    : "hover:bg-gray-100 text-gray-700"
+                }`}
+              >
+                Dr. {doctor.name} —{" "}
+                <span className="text-gray-500">{doctor.specialty}</span>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

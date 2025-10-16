@@ -1,67 +1,22 @@
-/**
- * WeekView Component
- *
- * Displays appointments for a week (Monday - Sunday) in a grid format.
- *
- * TODO for candidates:
- * 1. Generate a 7-day grid (Monday through Sunday)
- * 2. Generate time slots for each day
- * 3. Position appointments in the correct day and time
- * 4. Make it responsive (may need horizontal scroll on mobile)
- * 5. Color-code appointments by type
- * 6. Handle overlapping appointments
- */
-
 "use client";
 
-import type { Appointment, Doctor, TimeSlot } from "@/types";
+import type { Appointment, Doctor } from "@/types";
 import { format, addDays } from "date-fns";
 import { AppointmentCard } from "./AppointmentCard";
 
 interface WeekViewProps {
   appointments: Appointment[];
   doctor: Doctor | undefined;
-  weekStartDate: Date; // Should be a Monday
+  weekStartDate: Date;
 }
 
-/**
- * WeekView Component
- *
- * Renders a weekly calendar grid with appointments.
- *
- * TODO: Implement this component
- *
- * Architecture suggestions:
- * 1. Generate an array of 7 dates (Mon-Sun) from weekStartDate
- * 2. Generate time slots (same as DayView: 8 AM - 6 PM)
- * 3. Create a grid: rows = time slots, columns = days
- * 4. Position appointments in the correct cell (day + time)
- *
- * Consider:
- * - How to make the grid scrollable horizontally on mobile?
- * - How to show day names and dates in headers?
- * - How to handle appointments that span multiple hours?
- * - Should you reuse logic from DayView?
- */
 export function WeekView({
   appointments,
   doctor,
   weekStartDate,
 }: WeekViewProps) {
-  /**
-   * TODO: Generate array of 7 dates (Monday through Sunday)
-   *
-   * Starting from weekStartDate, create an array of the next 7 days
-   */
+  // Generate 7 days (Mon–Sun)
   function getWeekDays(): Date[] {
-    // TODO: Implement week days generation
-    // Example:
-    // return [
-    //   new Date(weekStartDate), // Monday
-    //   addDays(weekStartDate, 1), // Tuesday
-    //   ...
-    //   addDays(weekStartDate, 6), // Sunday
-    // ];
     const days: Date[] = [];
     for (let i = 0; i < 7; i++) {
       const day = new Date(weekStartDate);
@@ -71,22 +26,14 @@ export function WeekView({
     return days;
   }
 
-  /**
-   * TODO: Generate time slots (same as DayView)
-   */
+  // Generate hourly time slots (8 AM – 6 PM)
   function generateTimeSlots() {
-    // TODO: Implement (can be same as DayView)
     const slots = [];
-    const startHour = 8;
-    const endHour = 18; // 6 PM
-
-    for (let hour = startHour; hour < endHour; hour++) {
+    for (let hour = 8; hour < 18; hour++) {
       const start = new Date();
       start.setHours(hour, 0, 0, 0);
-
       const end = new Date();
       end.setHours(hour + 1, 0, 0, 0);
-
       slots.push({
         start,
         end,
@@ -98,87 +45,59 @@ export function WeekView({
     return slots;
   }
 
-  /**
-   * TODO: Get appointments for a specific day
-   */
-  function getAppointmentsForDay(date: Date): Appointment[] {
-    // TODO: Filter appointments that fall on this specific day
-    return appointments.filter((apt) => {
-      const aptDate = new Date(apt.startTime);
-      return (
-        aptDate.getFullYear() === date.getFullYear() &&
-        aptDate.getMonth() === date.getMonth() &&
-        aptDate.getDate() === date.getDate()
-      );
-    });
-  }
-
-  /**
-   * TODO: Get appointments for a specific day and time slot
-   */
-  function getAppointmentsForDayAndSlot(
-    date: Date,
-    slotStart: Date
-  ): Appointment[] {
-    // TODO: Filter appointments for this day and time
+  // Appointments for a specific day and time slot
+  function getAppointmentsForDayAndSlot(date: Date, slotStart: Date) {
     const slotEnd = new Date(slotStart);
     slotEnd.setHours(slotEnd.getHours() + 1);
 
     return appointments.filter((apt) => {
       const aptStart = new Date(apt.startTime);
       const aptEnd = new Date(apt.endTime);
-
-      // Match same day
       const sameDay =
         aptStart.getFullYear() === date.getFullYear() &&
         aptStart.getMonth() === date.getMonth() &&
         aptStart.getDate() === date.getDate();
 
-      // Check overlap with slot
       const overlaps = aptStart < slotEnd && aptEnd > slotStart;
-
       return sameDay && overlaps;
     });
   }
 
   const weekDays = getWeekDays();
   const timeSlots = generateTimeSlots();
-  const typeColors: Record<string, string> = {
-    checkup: "bg-blue-100 border-blue-400",
-    consultation: "bg-green-100 border-green-400",
-    surgery: "bg-red-100 border-red-400",
-    default: "bg-gray-100 border-gray-400",
-  };
 
   return (
     <div className="week-view">
-      {/* Week header */}
-      <div className="mb-4">
+      {/* Header */}
+      <div className="mb-6">
         <h3 className="text-lg font-semibold text-gray-900">
-          {/* TODO: Format week range (e.g., "Oct 14 - Oct 20, 2024") */}
-          {format(weekStartDate, "MMM d")} -{" "}
+          {format(weekStartDate, "MMM d")} –{" "}
           {format(addDays(weekStartDate, 6), "MMM d, yyyy")}
         </h3>
         {doctor && (
           <p className="text-sm text-gray-600">
-            Dr. {doctor.name} - {doctor.specialty}
+            Dr. {doctor.name} — {doctor.specialty}
           </p>
         )}
       </div>
 
-      {/* Week grid - may need horizontal scroll on mobile */}
-      <div className="border border-gray-200 rounded-lg overflow-x-auto">
-        {/* TODO: Implement the week grid */}
-        <table className="min-w-full border-collapse">
+      {/* Grid Wrapper (scrollable) */}
+      <div className="border border-gray-200 rounded-xl overflow-x-auto bg-white shadow-sm">
+        <table className="min-w-full border-collapse text-sm">
           <thead>
-            <tr>
-              <th className="w-20 p-2 text-xs bg-gray-50">Time</th>
+            <tr className="bg-gradient-to-r from-blue-50 to-indigo-50 text-gray-700">
+              <th className="w-24 p-3 text-left font-semibold sticky left-0 bg-gradient-to-r from-blue-50 to-indigo-50">
+                Time
+              </th>
               {weekDays.map((day, index) => (
-                <th key={index} className="p-2 text-xs bg-gray-50 border-l">
-                  <div className="font-semibold">
+                <th
+                  key={index}
+                  className="p-3 text-center font-semibold border-l border-gray-200"
+                >
+                  <div className="text-sm font-medium">
                     {day.toLocaleDateString("en-US", { weekday: "short" })}
                   </div>
-                  <div className="text-gray-600 text-xs">
+                  <div className="text-xs text-gray-500">
                     {day.toLocaleDateString("en-US", {
                       month: "short",
                       day: "numeric",
@@ -190,23 +109,38 @@ export function WeekView({
           </thead>
 
           <tbody>
-            {timeSlots.map((slot, slotIndex) => (
-              <tr key={slotIndex} className="border-t">
-                <td className="p-2 text-xs text-gray-600">{slot.label}</td>
+            {timeSlots.map((slot, i) => (
+              <tr
+                key={i}
+                className={`border-t border-gray-100 hover:bg-gray-50 transition`}
+              >
+                {/* Time label column */}
+                <td className="p-3 text-xs text-gray-500 font-medium sticky left-0 bg-white border-r border-gray-100">
+                  {slot.label}
+                </td>
 
-                {weekDays.map((day, dayIndex) => (
+                {/* Appointment cells */}
+                {weekDays.map((day, j) => (
                   <td
-                    key={dayIndex}
-                    className="p-1 border-l align-top min-h-[60px]"
+                    key={j}
+                    className="p-1 border-l border-gray-100 align-top min-h-[60px]"
                   >
-                    {getAppointmentsForDayAndSlot(day, slot.start).map(
-                      (apt) => (
-                        <AppointmentCard
-                          key={apt.id}
-                          appointment={apt}
-                          compact
-                        />
-                      )
+                    {getAppointmentsForDayAndSlot(day, slot.start).length >
+                    0 ? (
+                      <div className="space-y-1">
+                        {getAppointmentsForDayAndSlot(day, slot.start).map(
+                          (apt) => (
+                            <AppointmentCard
+                              key={apt.id}
+                              appointment={apt}
+                              // @ts-ignore — optional compact prop
+                              compact
+                            />
+                          )
+                        )}
+                      </div>
+                    ) : (
+                      <div className="h-6"></div>
                     )}
                   </td>
                 ))}
@@ -216,18 +150,12 @@ export function WeekView({
         </table>
       </div>
 
-      {/* Empty state */}
+      {/* Empty State */}
       {appointments.length === 0 && (
-        <div className="mt-4 text-center text-gray-500 text-sm">
-          No appointments scheduled for this week
+        <div className="mt-6 text-center text-gray-500 text-sm">
+          No appointments scheduled for this week 🗓️
         </div>
       )}
     </div>
   );
 }
-
-/**
- * TODO: Consider reusing the AppointmentCard component from DayView
- *
- * You might want to add a "compact" prop to make it smaller for week view
- */

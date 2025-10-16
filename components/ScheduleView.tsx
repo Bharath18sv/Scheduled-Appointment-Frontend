@@ -1,17 +1,3 @@
-/**
- * ScheduleView Component
- *
- * Main component that orchestrates the schedule display.
- * This component should compose smaller components together.
- *
- * TODO for candidates:
- * 1. Create the component structure (header, controls, calendar)
- * 2. Compose DoctorSelector, DayView, WeekView together
- * 3. Handle view switching (day vs week)
- * 4. Manage state or use the useAppointments hook
- * 5. Think about component composition and reusability
- */
-
 "use client";
 
 import type { CalendarView } from "@/types";
@@ -30,19 +16,6 @@ interface ScheduleViewProps {
   onViewChange: (view: CalendarView) => void;
 }
 
-/**
- * ScheduleView Component
- *
- * This is the main container component for the schedule interface.
- *
- * TODO: Implement this component
- *
- * Consider:
- * - How to structure the layout (header, controls, calendar)
- * - How to compose smaller components
- * - How to pass data down to child components
- * - How to handle user interactions (view switching, date changes)
- */
 export function ScheduleView({
   selectedDoctorId,
   selectedDate,
@@ -51,7 +24,6 @@ export function ScheduleView({
   onDateChange,
   onViewChange,
 }: ScheduleViewProps) {
-  // TODO: Use the useAppointments hook to fetch data
   const weekStartDate = startOfWeek(selectedDate, { weekStartsOn: 1 }); // Monday
   const weekEndDate = addDays(weekStartDate, 6); // Sunday
 
@@ -63,21 +35,33 @@ export function ScheduleView({
   });
 
   if (loading)
-    return <p className="p-6 text-gray-500">Loading appointments...</p>;
-  if (error) return <p className="p-6 text-red-500">Error loading data</p>;
+    return (
+      <div className="flex justify-center items-center h-64 text-gray-500">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mr-3"></div>
+        Loading appointments...
+      </div>
+    );
+
+  if (error)
+    return (
+      <div className="p-6 text-center text-red-600 bg-red-50 border border-red-200 rounded-lg">
+        Error loading data. Please try again later.
+      </div>
+    );
 
   return (
-    <div className="bg-white rounded-lg shadow-lg">
-      {/* Header */}
-      <div className="border-b border-gray-200 p-6">
-        <div className="flex justify-between items-center">
+    <div className="bg-white rounded-xl shadow-lg border border-gray-100">
+      {/* Header Section */}
+      <div className="border-b border-gray-200 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-xl">
+        <div className="flex flex-wrap justify-between items-center gap-4">
+          {/* Title */}
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              Doctor Schedule
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+              🩺 Doctor Schedule
             </h2>
             {doctor ? (
               <p className="text-sm text-gray-600 mt-1">
-                Dr. {doctor.name} – {doctor.specialty}
+                Dr. {doctor.name} — <span>{doctor.specialty}</span>
               </p>
             ) : (
               <p className="text-sm text-gray-500 mt-1">Select a doctor</p>
@@ -85,38 +69,39 @@ export function ScheduleView({
           </div>
 
           {/* Controls */}
-          <div className="flex gap-4 items-center">
+          <div className="flex flex-wrap gap-3 items-center">
+            {/* Doctor Selector */}
             <DoctorSelector
               selectedDoctorId={selectedDoctorId}
               onDoctorChange={onDoctorChange}
             />
 
-            {/* Simple date picker */}
+            {/* Date Picker */}
             <input
               type="date"
-              className="border rounded p-2 text-sm"
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
               value={selectedDate.toISOString().split("T")[0]}
               onChange={(e) => onDateChange(new Date(e.target.value))}
             />
 
-            {/* View toggle */}
-            <div className="flex gap-2">
+            {/* View Switch */}
+            <div className="flex gap-2 bg-gray-100 rounded-lg p-1">
               <button
                 onClick={() => onViewChange("day")}
-                className={`px-4 py-2 text-sm rounded ${
+                className={`px-4 py-2 text-sm font-medium rounded-md transition ${
                   view === "day"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-700"
+                    ? "bg-blue-600 text-white shadow"
+                    : "text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 Day
               </button>
               <button
                 onClick={() => onViewChange("week")}
-                className={`px-4 py-2 text-sm rounded ${
+                className={`px-4 py-2 text-sm font-medium rounded-md transition ${
                   view === "week"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-200 text-gray-700"
+                    ? "bg-blue-600 text-white shadow"
+                    : "text-gray-700 hover:bg-gray-200"
                 }`}
               >
                 Week
@@ -126,8 +111,8 @@ export function ScheduleView({
         </div>
       </div>
 
-      {/* Calendar */}
-      <div className="p-6">
+      {/* Calendar Section */}
+      <div className="p-6 bg-gray-50 rounded-b-xl">
         {view === "day" ? (
           <DayView
             appointments={appointments}
